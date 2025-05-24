@@ -5,6 +5,8 @@ import {
   groupPerformance, type GroupPerformance, type InsertGroupPerformance,
   monthlyPerformance, type MonthlyPerformance, type InsertMonthlyPerformance
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -285,4 +287,132 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+  
+  async updateUserLastLogin(id: number): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ lastLogin: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+  
+  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+    const [newTransaction] = await db
+      .insert(transactions)
+      .values(transaction)
+      .returning();
+    return newTransaction;
+  }
+  
+  async getTransactionsByUserId(userId: number): Promise<Transaction[]> {
+    return db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.userId, userId))
+      .orderBy(desc(transactions.date));
+  }
+  
+  async getUserBalance(userId: number): Promise<number> {
+    const result = await db
+      .select({ total: sql<number>`SUM(CASE WHEN type IN ('contribution', 'dividend') THEN amount ELSE -amount END)` })
+      .from(transactions)
+      .where(eq(transactions.userId, userId));
+    
+    return result[0]?.total || 0;
+  }
+  
+  async getUserTotalContributions(userId: number): Promise<number> {
+    const result = await db
+      .select({ total: sql<number>`SUM(amount)` })
+      .from(transactions)
+      .where(and(
+        eq(transactions.userId, userId),
+        eq(transactions.type, 'contribution')
+      ));
+    
+    return result[0]?.total || 0;
+  }
+  
+  async getUserTotalEarnings(userId: number): Promise<number> {
+    const result = await db
+      .select({ total: sql<number>`SUM(amount)` })
+      .from(transactions)
+      .where(and(
+        eq(transactions.userId, userId),
+        eq(transactions.type, 'dividend')
+      ));
+    
+    return result[0]?.total || 0;
+  }
+  
+  async createInvestment(investment: InsertInvestment): Promise<Investment> {
+    const [newInvestment] = await db
+      .insert(investments)
+      .values(investment)
+      .returning();
+    return newInvestment;
+  }
+  
+  async getActiveInvestments(): Promise<Investment[]> {
+    return db
+      .select()
+      .from(investments)
+      .where(eq(investments.active, true));
+  }
+  
+  async getLatestGroupPerformance(): Promise<GroupPerformance | undefined> {
+    const [performance] = await db
+      .select()
+      .from(groupPerformance)
+      .orderBy(desc(groupPerformance.date))
+      .limit(1);
+    
+    return performance;
+  }
+  
+  async updateGroupPerformance(performance: InsertGroupPerformance): Promise<GroupPerformance> {
+    const [newPerformance] = await db
+      .insert(groupPerformance)
+      .values(performance)
+      .returning();
+    return newPerformance;
+  }
+  
+  async getMonthlyPerformance(limit: number): Promise<MonthlyPerformance[]> {
+    return db
+      .select()
+      .from(monthlyPerformance)
+      .orderBy(desc(sql`${monthlyPerformance.year}, ${monthlyPerformance.month}`))
+      .limit(limit);
+  }
+  
+  async addMonthlyPerformance(performance: InsertMonthlyPerformance): Promise<MonthlyPerformance> {
+    const [newPerformance] = await db
+      .insert(monthlyPerformance)
+      .values(performance)
+      .returning();
+    return newPerformance;
+  }
+}
+
+// Switch to using the DatabaseStorage
+export const storage = new DatabaseStorage();
