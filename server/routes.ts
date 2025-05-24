@@ -12,8 +12,10 @@ import session from "express-session";
 import createMemoryStore from "memorystore";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import ConnectPgSimple from "connect-pg-simple";
 
 const MemoryStore = createMemoryStore(session);
+const PgSession = ConnectPgSimple(session);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure session
@@ -22,10 +24,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       secret: process.env.SESSION_SECRET || "ikilen-investment-group-secret",
       resave: false,
       saveUninitialized: false,
-      cookie: { secure: process.env.NODE_ENV === "production", maxAge: 86400000 }, // 1 day
-      store: new MemoryStore({
-        checkPeriod: 86400000, // prune expired entries every 24h
-      }),
+      cookie: { 
+        secure: process.env.NODE_ENV === "production", 
+        maxAge: 86400000, // 1 day
+        httpOnly: true,
+        sameSite: 'lax'
+      },
+      store: new PgSession({
+        conObject: {
+          connectionString: process.env.DATABASE_URL,
+        },
+        createTableIfMissing: true,
+        tableName: 'session'
+      })
     })
   );
 

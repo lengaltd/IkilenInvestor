@@ -21,12 +21,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   const navigateTo = (path: string) => {
-    // Using direct window.location.href for more reliable navigation
+    // Simpler, more reliable navigation
     window.location.href = path;
-    // Add a small delay to ensure state is updated before navigation
-    setTimeout(() => {
-      window.location.href = path;
-    }, 100);
   };
 
   React.useEffect(() => {
