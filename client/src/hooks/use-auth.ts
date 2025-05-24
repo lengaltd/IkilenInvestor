@@ -1,5 +1,4 @@
-import React, { useState, useEffect, createContext, useContext, ReactNode } from "react";
-import { useLocation } from "wouter";
+import * as React from "react";
 import { User, UserCredentials, RegisterData } from "@/types";
 import { loginUser, registerUser, logoutUser, getCurrentUser } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -13,15 +12,19 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [, setLocation] = useLocation();
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = React.useState<User | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [, setLocation] = React.useState("");
   const { toast } = useToast();
 
-  useEffect(() => {
+  const navigateTo = (path: string) => {
+    window.location.href = path;
+  };
+
+  React.useEffect(() => {
     const loadUser = async () => {
       try {
         const userData = await getCurrentUser();
@@ -42,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userData = await loginUser(credentials);
       setUser(userData);
-      setLocation("/dashboard");
+      navigateTo("/dashboard");
       toast({
         title: "Login successful",
         description: `Welcome back, ${userData.firstName}!`,
@@ -64,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userData = await registerUser(data);
       setUser(userData);
-      setLocation("/dashboard");
+      navigateTo("/dashboard");
       toast({
         title: "Registration successful",
         description: `Welcome, ${userData.firstName}!`,
@@ -86,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await logoutUser();
       setUser(null);
-      setLocation("/login");
+      navigateTo("/login");
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
@@ -102,24 +105,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const value = {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    login,
+    register,
+    logout
+  };
+
   return React.createElement(
     AuthContext.Provider,
-    { 
-      value: {
-        user,
-        isLoading,
-        isAuthenticated: !!user,
-        login,
-        register,
-        logout
-      } 
-    },
+    { value },
     children
   );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = React.useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
