@@ -41,6 +41,8 @@ export default function Login() {
     try {
       setError(null);
       await login(values);
+      // Direct navigation after successful login
+      window.location.href = "/dashboard";
     } catch (err) {
       setError("Invalid username or password");
     }
