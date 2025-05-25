@@ -154,25 +154,7 @@ export function ContributionForm() {
                 />
               </div>
 
-              <div className="sm:col-span-6">
-                <FormField
-                  control={form.control}
-                  name="note"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Note (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Add any special instructions"
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              
 
               <div className="sm:col-span-6">
                 <FormField
