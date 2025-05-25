@@ -114,7 +114,7 @@ export default function Login() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-primary-800 hover:bg-primary-900"
+                  className="w-full bg-primary hover:bg-primary/90"
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign in"}
@@ -125,7 +125,7 @@ export default function Login() {
           <CardFooter className="flex flex-col items-center justify-center gap-4">
             <div className="text-sm text-center">
               <span className="text-gray-600">Don't have an account? </span>
-              <Link href="/register" className="font-medium text-primary-800 hover:text-primary-900">
+              <Link href="/register" className="font-medium text-primary hover:text-primary/80">
                 Register now
               </Link>
             </div>
