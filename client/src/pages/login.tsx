@@ -41,8 +41,7 @@ export default function Login() {
     try {
       setError(null);
       await login(values);
-      // Direct navigation after successful login
-      window.location.href = "/dashboard";
+      // Navigation is handled by the auth hook
     } catch (err) {
       setError("Invalid username or password");
     }

@@ -46,11 +46,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const userData = await loginUser(credentials);
       setUser(userData);
-      navigateTo("/dashboard");
       toast({
         title: "Login successful",
         description: `Welcome back, ${userData.firstName}!`,
       });
+      // Use setTimeout to ensure toast is shown before navigation
+      setTimeout(() => {
+        navigateTo("/dashboard");
+      }, 100);
     } catch (error) {
       toast({
         title: "Login failed",
