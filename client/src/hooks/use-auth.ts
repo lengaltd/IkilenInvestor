@@ -31,8 +31,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userData = await getCurrentUser();
         setUser(userData);
       } catch (error) {
-        // User is not authenticated
-        setUser(null);
+        // Only set user to null if we get a 401 (not authenticated)
+        // Don't clear user state for network errors or other issues
+        if (error instanceof Error && error.message.includes('401')) {
+          setUser(null);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -50,10 +53,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         title: "Login successful",
         description: `Welcome back, ${userData.firstName}!`,
       });
-      // Use setTimeout to ensure toast is shown before navigation
-      setTimeout(() => {
-        navigateTo("/dashboard");
-      }, 100);
+      // Let the route protection logic handle navigation
+      // This prevents conflicts with useEffect
     } catch (error) {
       toast({
         title: "Login failed",
