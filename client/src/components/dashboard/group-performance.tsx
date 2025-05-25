@@ -7,20 +7,23 @@ interface GroupPerformanceProps {
 }
 
 export function GroupPerformance({ groupPerformance }: GroupPerformanceProps) {
-  // Provide default values if groupPerformance is undefined
-  const defaultPerformance = {
-    totalMembers: 0,
-    totalAssets: 0,
-    activeInvestments: 0,
-    ytdReturns: 0
-  };
-
-  const performance = groupPerformance || defaultPerformance;
+  if (!groupPerformance) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Group Performance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Loading group performance data...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader className="border-b border-gray-200">
-        <CardTitle className="text-lg">Group Performance</CardTitle>
+        <CardTitle>Group Performance</CardTitle>
         <CardDescription>Overview of IKILEN investment group metrics</CardDescription>
       </CardHeader>
       <CardContent className="px-4 py-5">
@@ -28,13 +31,13 @@ export function GroupPerformance({ groupPerformance }: GroupPerformanceProps) {
           <div className="px-4 py-5 bg-gray-50 shadow rounded-lg overflow-hidden sm:p-6">
             <dt className="text-sm font-medium text-gray-500 truncate">Total Members</dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              {performance.totalMembers}
+              {groupPerformance?.totalMembers || 0}
             </dd>
           </div>
           <div className="px-4 py-5 bg-gray-50 shadow rounded-lg overflow-hidden sm:p-6">
             <dt className="text-sm font-medium text-gray-500 truncate">Group Total Assets</dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              {formatCurrency(performance.totalAssets)}
+              {formatCurrency(groupPerformance.totalAssets)}
             </dd>
           </div>
           <div className="px-4 py-5 bg-gray-50 shadow rounded-lg overflow-hidden sm:p-6">
