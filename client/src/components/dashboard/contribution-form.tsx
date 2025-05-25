@@ -38,7 +38,6 @@ const contributionFormSchema = z.object({
     required_error: "Please select a payment method",
   }),
   note: z.string().optional(),
-  terms: z.boolean().refine(val => val === true, "You must accept the terms"),
 });
 
 type ContributionFormValues = z.infer<typeof contributionFormSchema>;
@@ -52,7 +51,6 @@ export function ContributionForm() {
       amount: "",
       paymentMethod: "Bank Transfer",
       note: "",
-      terms: false,
     },
   });
 
@@ -156,31 +154,7 @@ export function ContributionForm() {
 
               
 
-              <div className="sm:col-span-6">
-                <FormField
-                  control={form.control}
-                  name="terms"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          I confirm this contribution follows group guidelines
-                        </FormLabel>
-                        <FormDescription>
-                          I understand that contributions are subject to the group's investment terms.
-                        </FormDescription>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              
             </div>
 
             <div className="flex justify-end space-x-4">
