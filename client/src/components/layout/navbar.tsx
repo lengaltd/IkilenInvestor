@@ -24,41 +24,45 @@ export function Navbar() {
               <span className="font-bold text-xl text-primary-800">IKILEN</span>
             </div>
             <div className="hidden md:ml-6 md:flex md:space-x-8">
-              <Link href="/dashboard">
-                <a className={`${
+              <Link 
+                href="/dashboard"
+                className={`${
                   location === "/dashboard" 
                     ? "border-primary-800 text-gray-900" 
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}>
-                  Dashboard
-                </a>
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                Dashboard
               </Link>
-              <Link href="/investments">
-                <a className={`${
+              <Link 
+                href="/investments"
+                className={`${
                   location === "/investments"
                     ? "border-primary-800 text-gray-900" 
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}>
-                  Investments
-                </a>
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                Investments
               </Link>
-              <Link href="/history">
-                <a className={`${
+              <Link 
+                href="/history"
+                className={`${
                   location === "/history"
                     ? "border-primary-800 text-gray-900" 
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}>
-                  History
-                </a>
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                History
               </Link>
-              <Link href="/settings">
-                <a className={`${
+              <Link 
+                href="/settings"
+                className={`${
                   location === "/settings"
                     ? "border-primary-800 text-gray-900" 
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}>
-                  Settings
-                </a>
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                Settings
               </Link>
             </div>
           </div>
@@ -97,13 +101,17 @@ export function Navbar() {
             </div>
           ) : (
             <div className="flex items-center space-x-4">
-              <Link href="/login">
-                <a className="text-gray-700 hover:text-gray-900 font-medium">Login</a>
+              <Link 
+                href="/login"
+                className="text-gray-700 hover:text-gray-900 font-medium"
+              >
+                Login
               </Link>
-              <Link href="/register">
-                <a className="bg-primary-800 text-white px-4 py-2 rounded-md hover:bg-primary-700">
-                  Register
-                </a>
+              <Link 
+                href="/register"
+                className="bg-primary-800 text-white px-4 py-2 rounded-md hover:bg-primary-700"
+              >
+                Register
               </Link>
             </div>
           )}
@@ -113,41 +121,45 @@ export function Navbar() {
       {/* Mobile menu */}
       <div className={`md:hidden ${mobileMenuOpen ? "block" : "hidden"}`}>
         <div className="pt-2 pb-3 space-y-1">
-          <Link href="/dashboard">
-            <a className={`${
+          <Link 
+            href="/dashboard"
+            className={`${
               location === "/dashboard"
                 ? "bg-primary-50 border-primary-800 text-primary-800"
                 : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}>
-              Dashboard
-            </a>
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
+          >
+            Dashboard
           </Link>
-          <Link href="/investments">
-            <a className={`${
+          <Link 
+            href="/investments"
+            className={`${
               location === "/investments"
                 ? "bg-primary-50 border-primary-800 text-primary-800"
                 : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}>
-              Investments
-            </a>
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
+          >
+            Investments
           </Link>
-          <Link href="/history">
-            <a className={`${
+          <Link 
+            href="/history"
+            className={`${
               location === "/history"
                 ? "bg-primary-50 border-primary-800 text-primary-800"
                 : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}>
-              History
-            </a>
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
+          >
+            History
           </Link>
-          <Link href="/settings">
-            <a className={`${
+          <Link 
+            href="/settings"
+            className={`${
               location === "/settings"
                 ? "bg-primary-50 border-primary-800 text-primary-800"
                 : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}>
-              Settings
-            </a>
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
+          >
+            Settings
           </Link>
           {user && (
             <button
