@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 import {
   Form,
@@ -51,6 +52,7 @@ type ContributionFormValues = z.infer<typeof contributionFormSchema>;
 
 export function ContributionForm() {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const form = useForm<ContributionFormValues>({
     resolver: zodResolver(contributionFormSchema),
@@ -63,11 +65,15 @@ export function ContributionForm() {
 
   const contributionMutation = useMutation({
     mutationFn: async (values: ContributionFormValues) => {
+      if (!user) {
+        throw new Error("You must be logged in to make a contribution");
+      }
       return apiRequest("POST", "/api/transactions", {
         amount: parseFloat(values.amount),
         type: "contribution",
         paymentMethod: values.paymentMethod,
         note: values.note || "Monthly Contribution",
+        userId: user.id
       });
     },
     onSuccess: () => {
