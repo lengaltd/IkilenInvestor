@@ -53,8 +53,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         title: "Login successful",
         description: `Welcome back, ${userData.firstName}!`,
       });
-      // Let the route protection logic handle navigation
-      // This prevents conflicts with useEffect
+      // Navigate to dashboard after successful login
+      navigateTo("/dashboard");
     } catch (error) {
       toast({
         title: "Login failed",
