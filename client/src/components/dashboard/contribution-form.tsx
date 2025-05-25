@@ -18,22 +18,29 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Card, 
-  CardContent, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 
 const contributionFormSchema = z.object({
-  amount: z.string()
+  amount: z
+    .string()
     .min(1, "Amount is required")
-    .refine(val => !isNaN(parseFloat(val)), "Must be a valid number")
-    .refine(val => parseFloat(val) > 0, "Amount must be greater than 0"),
+    .refine((val) => !isNaN(parseFloat(val)), "Must be a valid number")
+    .refine((val) => parseFloat(val) > 0, "Amount must be greater than 0"),
   paymentMethod: z.string({
     required_error: "Please select a payment method",
   }),
@@ -44,7 +51,7 @@ type ContributionFormValues = z.infer<typeof contributionFormSchema>;
 
 export function ContributionForm() {
   const { toast } = useToast();
-  
+
   const form = useForm<ContributionFormValues>({
     resolver: zodResolver(contributionFormSchema),
     defaultValues: {
@@ -76,7 +83,8 @@ export function ContributionForm() {
     onError: (error) => {
       toast({
         title: "Submission failed",
-        description: "There was an error submitting your contribution. Please try again.",
+        description:
+          "There was an error submitting your contribution. Please try again.",
         variant: "destructive",
       });
     },
@@ -114,7 +122,9 @@ export function ContributionForm() {
                             {...field}
                           />
                           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <span className="text-gray-500 sm:text-sm">USD</span>
+                            <span className="text-gray-500 sm:text-sm">
+                              USD
+                            </span>
                           </div>
                         </div>
                       </FormControl>
@@ -131,8 +141,8 @@ export function ContributionForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Payment Method</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
+                      <Select
+                        onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
@@ -141,9 +151,15 @@ export function ContributionForm() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                          <SelectItem value="Credit Card">Credit Card</SelectItem>
-                          <SelectItem value="Mobile Money">Mobile Money</SelectItem>
+                          <SelectItem value="Bank Transfer">
+                            Bank Transfer
+                          </SelectItem>
+                          <SelectItem value="Credit Card">
+                            Credit Card
+                          </SelectItem>
+                          <SelectItem value="Mobile Money">
+                            Mobile Money
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -151,10 +167,6 @@ export function ContributionForm() {
                   )}
                 />
               </div>
-
-              
-
-              
             </div>
 
             <div className="flex justify-end space-x-4">
@@ -165,12 +177,10 @@ export function ContributionForm() {
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit"
-                disabled={contributionMutation.isPending}
-                className="bg-primary-800 hover:bg-primary-900"
-              >
-                {contributionMutation.isPending ? "Submitting..." : "Submit Contribution"}
+              <Button type="submit" disabled={contributionMutation.isPending}>
+                {contributionMutation.isPending
+                  ? "Submitting..."
+                  : "Submit Contribution"}
               </Button>
             </div>
           </form>
