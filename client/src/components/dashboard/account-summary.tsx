@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { 
   WalletMinimal, 
   PiggyBank, 
@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
 
 interface AccountSummaryProps {
   balance: number;
@@ -17,12 +16,12 @@ interface AccountSummaryProps {
 }
 
 export function AccountSummary({ balance, totalContributions, totalEarnings }: AccountSummaryProps) {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {/* Balance Card */}
-      <Card onClick={() => navigate("/history")} className="cursor-pointer">
+      <Card onClick={() => setLocation("/history")} className="cursor-pointer">
         <CardContent className="pt-6">
           <div className="flex items-center">
             <div className="flex-shrink-0 bg-primary-100 rounded-md p-3">
@@ -51,7 +50,12 @@ export function AccountSummary({ balance, totalContributions, totalEarnings }: A
       </Card>
 
       {/* Contributions Card */}
-      <Card onClick={() => navigate("/#contribute-section")} className="cursor-pointer">
+      <Card onClick={() => {
+        setLocation("/");
+        setTimeout(() => {
+          document.getElementById("contribute-section")?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }} className="cursor-pointer">
         <CardContent className="pt-6">
           <div className="flex items-center">
             <div className="flex-shrink-0 bg-secondary-100 rounded-md p-3">
