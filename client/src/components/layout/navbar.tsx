@@ -85,6 +85,13 @@ export function Navbar() {
                   <span className="hidden md:block ml-3 text-sm font-medium text-gray-700">
                     {user.firstName} {user.lastName}
                   </span>
+                  <Button
+                    variant="ghost"
+                    onClick={() => logout()}
+                    className="hidden md:block ml-3 text-sm font-medium text-gray-700 hover:text-gray-900"
+                  >
+                    Logout
+                  </Button>
                 </div>
               </div>
               
