@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface AccountSummaryProps {
   balance: number;
@@ -16,10 +17,12 @@ interface AccountSummaryProps {
 }
 
 export function AccountSummary({ balance, totalContributions, totalEarnings }: AccountSummaryProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {/* Balance Card */}
-      <Card>
+      <Card onClick={() => navigate("/history")} className="cursor-pointer">
         <CardContent className="pt-6">
           <div className="flex items-center">
             <div className="flex-shrink-0 bg-primary-100 rounded-md p-3">
@@ -39,18 +42,16 @@ export function AccountSummary({ balance, totalContributions, totalEarnings }: A
         </CardContent>
         <CardFooter className="bg-gray-50 px-4 py-4">
           <div className="text-sm">
-            <Link href="/history">
-              <a className="font-medium text-primary-800 hover:text-primary-900 flex items-center">
+              <span className="font-medium text-primary-800 hover:text-primary-900 flex items-center">
                 View transactions
                 <ArrowRight className="ml-1 h-4 w-4" />
-              </a>
-            </Link>
+              </span>
           </div>
         </CardFooter>
       </Card>
 
       {/* Contributions Card */}
-      <Card>
+      <Card onClick={() => navigate("/#contribute-section")} className="cursor-pointer">
         <CardContent className="pt-6">
           <div className="flex items-center">
             <div className="flex-shrink-0 bg-secondary-100 rounded-md p-3">
@@ -70,10 +71,10 @@ export function AccountSummary({ balance, totalContributions, totalEarnings }: A
         </CardContent>
         <CardFooter className="bg-gray-50 px-4 py-4">
           <div className="text-sm">
-            <a href="#contribute-section" className="font-medium text-secondary-700 hover:text-secondary-800 flex items-center">
-              Make a contribution
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </a>
+              <span className="font-medium text-secondary-700 hover:text-secondary-800 flex items-center">
+                Make a contribution
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </span>
           </div>
         </CardFooter>
       </Card>
