@@ -1,0 +1,78 @@
+Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a>.
+    at a
+    at a
+    at https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=0e08674e:337:18
+    at div
+    at div
+    at _c11 (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/src/components/ui/card.tsx:123:13)
+    at div
+    at _c (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at AccountSummary (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/src/components/dashboard/account-summary.tsx:27:34)
+    at div
+    at main
+    at Dashboard (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/src/pages/dashboard.tsx:29:20)
+    at PrivateRoute (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/src/App.tsx?v=MENCT2p2rNKmQsYWaUyqG:33:25)
+    at Route (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=0e08674e:323:16)
+    at Switch (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=0e08674e:379:17)
+    at Router
+    at div
+    at div
+    at AppLayout
+    at Provider (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-BCLB22GG.js?v=0e08674e:22:15)
+    at TooltipProvider (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=0e08674e:59:5)
+    at AuthProvider (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/src/hooks/use-auth.ts:5:32)
+    at QueryClientProvider (https://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=0e08674e:2805:3)
+    at App
+printWarning @ chunk-WERSD76P.js?v=0e08674e:521
+error @ chunk-WERSD76P.js?v=0e08674e:505
+validateDOMNesting @ chunk-WERSD76P.js?v=0e08674e:8256
+createInstance @ chunk-WERSD76P.js?v=0e08674e:8328
+completeWork @ chunk-WERSD76P.js?v=0e08674e:16290
+completeUnitOfWork @ chunk-WERSD76P.js?v=0e08674e:19224
+performUnitOfWork @ chunk-WERSD76P.js?v=0e08674e:19206
+workLoopSync @ chunk-WERSD76P.js?v=0e08674e:19137
+renderRootSync @ chunk-WERSD76P.js?v=0e08674e:19116
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=0e08674e:18874
+flushSyncCallbacks @ chunk-WERSD76P.js?v=0e08674e:9119
+(anonymous) @ chunk-WERSD76P.js?v=0e08674e:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=0e08674e:555
+flush @ @tanstack_react-query.js?v=0e08674e:569
+batch @ @tanstack_react-query.js?v=0e08674e:587
+dispatch_fn @ @tanstack_react-query.js?v=0e08674e:996
+setData @ @tanstack_react-query.js?v=0e08674e:696
+onSuccess @ @tanstack_react-query.js?v=0e08674e:897
+resolve @ @tanstack_react-query.js?v=0e08674e:456
+Promise.then
+run @ @tanstack_react-query.js?v=0e08674e:498
+start @ @tanstack_react-query.js?v=0e08674e:536
+fetch @ @tanstack_react-query.js?v=0e08674e:926
+executeFetch_fn @ @tanstack_react-query.js?v=0e08674e:2211
+onSubscribe @ @tanstack_react-query.js?v=0e08674e:1898
+subscribe @ @tanstack_react-query.js?v=0e08674e:24
+(anonymous) @ @tanstack_react-query.js?v=0e08674e:3022
+subscribeToStore @ chunk-WERSD76P.js?v=0e08674e:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=0e08674e:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=0e08674e:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=0e08674e:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=0e08674e:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=0e08674e:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=0e08674e:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=0e08674e:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=0e08674e:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=0e08674e:9119
+commitRootImpl @ chunk-WERSD76P.js?v=0e08674e:19432
+commitRoot @ chunk-WERSD76P.js?v=0e08674e:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=0e08674e:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=0e08674e:18718
+workLoop @ chunk-WERSD76P.js?v=0e08674e:197
+flushWork @ chunk-WERSD76P.js?v=0e08674e:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=0e08674e:384
+client:536 WebSocket connection to 'wss://c5d58b18-076d-43be-bcf1-b3d7a54b3e8d-00-mw8oc34wo8bs.worf.replit.dev/?token=UMZCfWK1QG4J' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=UMZCfWK1QG4J' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
