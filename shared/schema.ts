@@ -77,6 +77,16 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
 
 export const insertInvestmentSchema = createInsertSchema(investments).omit({
   id: true,
+}).extend({
+  startDate: z.union([
+    z.string().transform((str) => new Date(str)),
+    z.date()
+  ]),
+  endDate: z.union([
+    z.string().transform((str) => new Date(str)),
+    z.date(),
+    z.null()
+  ]).optional(),
 });
 
 export const insertGroupPerformanceSchema = createInsertSchema(groupPerformance).omit({
