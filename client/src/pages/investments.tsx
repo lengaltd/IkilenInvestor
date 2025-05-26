@@ -425,7 +425,7 @@ export default function Investments() {
                 </CardContent>
                 <CardFooter className="bg-gray-50 border-t">
                   <div className="w-full text-sm">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center pt-4">
                       <span className="text-gray-700">Projected Annual Return:</span>
                       <span className="font-medium text-green-600">{formatCurrency(investment.totalAmount * (investment.returnRate / 100))}</span>
                     </div>
