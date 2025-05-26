@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useAuth } from "@/hooks/use-auth";
 import { 
   Card, 
   CardContent, 
@@ -30,7 +31,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { Plus, ThumbsUp, ThumbsDown, Users } from "lucide-react";
 
 const investmentSchema = z.object({
   name: z.string().min(1, "Investment name is required"),
@@ -53,10 +54,36 @@ type InvestmentFormValues = z.infer<typeof investmentSchema>;
 
 export default function Investments() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedInvestmentId, setSelectedInvestmentId] = useState<number | null>(null);
 
   const { data: investments, isLoading, error } = useQuery<Investment[]>({
     queryKey: ["/api/investments"],
+  });
+
+  const { data: investmentVotes } = useQuery({
+    queryKey: ["/api/investments", selectedInvestmentId, "votes"],
+    queryFn: () => apiRequest("GET", `/api/investments/${selectedInvestmentId}/votes`),
+    enabled: !!selectedInvestmentId,
+  });
+
+  const { data: userVotes } = useQuery({
+    queryKey: ["/api/investments", "my-votes"],
+    queryFn: async () => {
+      if (!investments) return {};
+      const votes: Record<number, any> = {};
+      for (const investment of investments) {
+        try {
+          const vote = await apiRequest("GET", `/api/investments/${investment.id}/my-vote`);
+          if (vote) votes[investment.id] = vote;
+        } catch (error) {
+          // User hasn't voted yet
+        }
+      }
+      return votes;
+    },
+    enabled: !!investments,
   });
 
   const form = useForm<InvestmentFormValues>({
@@ -80,13 +107,13 @@ export default function Investments() {
         returnRate: parseFloat(values.returnRate),
         startDate: new Date(values.startDate),
         endDate: values.endDate ? new Date(values.endDate) : null,
-        active: true,
+        active: false, // Will be activated through voting
       });
     },
     onSuccess: () => {
       toast({
         title: "Investment created",
-        description: "Your investment has been added successfully.",
+        description: "Your investment proposal has been submitted for voting.",
       });
       form.reset();
       setIsDialogOpen(false);
@@ -96,6 +123,30 @@ export default function Investments() {
       toast({
         title: "Creation failed",
         description: error?.message || "There was an error creating the investment. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const voteMutation = useMutation({
+    mutationFn: async ({ investmentId, vote }: { investmentId: number; vote: boolean }) => {
+      return apiRequest("POST", `/api/investments/${investmentId}/vote`, { vote });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Vote recorded",
+        description: "Your vote has been successfully recorded.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/investments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/investments", "my-votes"] });
+      if (selectedInvestmentId) {
+        queryClient.invalidateQueries({ queryKey: ["/api/investments", selectedInvestmentId, "votes"] });
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Vote failed",
+        description: error?.message || "There was an error recording your vote. Please try again.",
         variant: "destructive",
       });
     },
@@ -288,51 +339,152 @@ export default function Investments() {
         </div>
       ) : (
         <div className="px-4 sm:px-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {investments.map((investment) => (
-            <Card key={investment.id}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <CardTitle>{investment.name}</CardTitle>
-                  <Badge variant={investment.active ? "default" : "outline"}>
-                    {investment.active ? "Active" : "Closed"}
-                  </Badge>
-                </div>
-                <CardDescription>{investment.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <dl className="space-y-2">
-                  <div className="flex justify-between">
-                    <dt className="text-sm font-medium text-gray-500">Total Amount:</dt>
-                    <dd className="text-sm font-medium text-gray-900">{formatCurrency(investment.totalAmount)}</dd>
+          {investments.map((investment) => {
+            const userVote = userVotes?.[investment.id];
+            const hasVoted = !!userVote;
+            
+            return (
+              <Card key={investment.id}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <CardTitle>{investment.name}</CardTitle>
+                    <Badge variant={investment.active ? "default" : "secondary"}>
+                      {investment.active ? "Active" : "Pending Votes"}
+                    </Badge>
                   </div>
-                  <div className="flex justify-between">
-                    <dt className="text-sm font-medium text-gray-500">Return Rate:</dt>
-                    <dd className="text-sm font-medium text-green-600">{investment.returnRate}%</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-sm font-medium text-gray-500">Start Date:</dt>
-                    <dd className="text-sm font-medium text-gray-900">{formatDate(new Date(investment.startDate))}</dd>
-                  </div>
-                  {investment.endDate && (
+                  <CardDescription>{investment.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <dl className="space-y-2">
                     <div className="flex justify-between">
-                      <dt className="text-sm font-medium text-gray-500">End Date:</dt>
-                      <dd className="text-sm font-medium text-gray-900">{formatDate(new Date(investment.endDate))}</dd>
+                      <dt className="text-sm font-medium text-gray-500">Total Amount:</dt>
+                      <dd className="text-sm font-medium text-gray-900">{formatCurrency(investment.totalAmount)}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-sm font-medium text-gray-500">Return Rate:</dt>
+                      <dd className="text-sm font-medium text-green-600">{investment.returnRate}%</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-sm font-medium text-gray-500">Start Date:</dt>
+                      <dd className="text-sm font-medium text-gray-900">{formatDate(new Date(investment.startDate))}</dd>
+                    </div>
+                    {investment.endDate && (
+                      <div className="flex justify-between">
+                        <dt className="text-sm font-medium text-gray-500">End Date:</dt>
+                        <dd className="text-sm font-medium text-gray-900">{formatDate(new Date(investment.endDate))}</dd>
+                      </div>
+                    )}
+                  </dl>
+
+                  {!investment.active && (
+                    <div className="mt-4 pt-4 border-t">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-sm font-medium text-gray-700">Your Vote:</span>
+                        {hasVoted && (
+                          <Badge variant={userVote.vote ? "default" : "destructive"}>
+                            {userVote.vote ? "Yes" : "No"}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {!hasVoted && (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => voteMutation.mutate({ investmentId: investment.id, vote: true })}
+                            disabled={voteMutation.isPending}
+                            className="flex-1"
+                          >
+                            <ThumbsUp className="h-4 w-4 mr-1" />
+                            Yes
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => voteMutation.mutate({ investmentId: investment.id, vote: false })}
+                            disabled={voteMutation.isPending}
+                            className="flex-1"
+                          >
+                            <ThumbsDown className="h-4 w-4 mr-1" />
+                            No
+                          </Button>
+                        </div>
+                      )}
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full mt-2"
+                        onClick={() => setSelectedInvestmentId(investment.id)}
+                      >
+                        <Users className="h-4 w-4 mr-1" />
+                        View All Votes
+                      </Button>
                     </div>
                   )}
-                </dl>
-              </CardContent>
-              <CardFooter className="bg-gray-50 border-t">
-                <div className="w-full text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-700">Projected Annual Return:</span>
-                    <span className="font-medium text-green-600">{formatCurrency(investment.totalAmount * (investment.returnRate / 100))}</span>
+                </CardContent>
+                <CardFooter className="bg-gray-50 border-t">
+                  <div className="w-full text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Projected Annual Return:</span>
+                      <span className="font-medium text-green-600">{formatCurrency(investment.totalAmount * (investment.returnRate / 100))}</span>
+                    </div>
                   </div>
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
+                </CardFooter>
+              </Card>
+            );
+          })}
         </div>
       )}
+
+      {/* Voting Results Dialog */}
+      <Dialog open={!!selectedInvestmentId} onOpenChange={() => setSelectedInvestmentId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Voting Results</DialogTitle>
+            <DialogDescription>
+              See how members have voted on this investment proposal.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {investmentVotes && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {investmentVotes.filter((v: any) => v.vote === true).length}
+                  </div>
+                  <div className="text-sm text-gray-500">Yes Votes</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600">
+                    {investmentVotes.filter((v: any) => v.vote === false).length}
+                  </div>
+                  <div className="text-sm text-gray-500">No Votes</div>
+                </div>
+              </div>
+              
+              <div className="border-t pt-4">
+                <h4 className="font-medium mb-2">Individual Votes:</h4>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {investmentVotes.map((vote: any) => (
+                    <div key={vote.id} className="flex justify-between items-center">
+                      <span className="text-sm">{vote.firstName} {vote.lastName}</span>
+                      <Badge variant={vote.vote ? "default" : "destructive"}>
+                        {vote.vote ? "Yes" : "No"}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button onClick={() => setSelectedInvestmentId(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

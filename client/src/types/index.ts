@@ -62,6 +62,16 @@ export interface Investment {
   active: boolean;
 }
 
+export interface InvestmentVote {
+  id: number;
+  investmentId: number;
+  userId: number;
+  vote: boolean;
+  createdAt: string;
+  firstName?: string;
+  lastName?: string;
+}
+
 // Group performance types
 export interface GroupPerformance {
   id: number;

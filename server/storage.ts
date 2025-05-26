@@ -1,9 +1,17 @@
 import { 
-  users, type User, type InsertUser,
-  transactions, type Transaction, type InsertTransaction,
-  investments, type Investment, type InsertInvestment,
-  groupPerformance, type GroupPerformance, type InsertGroupPerformance,
-  monthlyPerformance, type MonthlyPerformance, type InsertMonthlyPerformance
+  users, 
+  transactions, 
+  investments, 
+  investmentVotes,
+  groupPerformance, 
+  monthlyPerformance,
+  type InsertUser,
+  type InsertTransaction,
+  type InsertInvestment,
+  type InsertInvestmentVote,
+  type InsertGroupPerformance,
+  type InsertMonthlyPerformance,
+  type User, type Transaction, type Investment, type GroupPerformance, type MonthlyPerformance
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -28,6 +36,10 @@ export interface IStorage {
   createInvestment(investment: InsertInvestment): Promise<Investment>;
   getActiveInvestments(): Promise<Investment[]>;
   getAllInvestments(): Promise<Investment[]>;
+  voteOnInvestment(vote: InsertInvestmentVote): Promise<any>;
+  checkInvestmentActivation(investmentId: number): Promise<void>;
+  getInvestmentVotes(investmentId: number): Promise<any>;
+  getUserVoteForInvestment(investmentId: number, userId: number): Promise<any>;
 
   // Group performance operations
   getLatestGroupPerformance(): Promise<GroupPerformance | undefined>;
@@ -165,6 +177,19 @@ export class MemStorage implements IStorage {
 
   async getAllInvestments(): Promise<Investment[]> {
     return Array.from(this.investments.values());
+  }
+
+  async voteOnInvestment(vote: InsertInvestmentVote): Promise<any> {
+    throw new Error("Method not implemented.");
+  }
+  async checkInvestmentActivation(investmentId: number): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  async getInvestmentVotes(investmentId: number): Promise<any> {
+    throw new Error("Method not implemented.");
+  }
+  async getUserVoteForInvestment(investmentId: number, userId: number): Promise<any> {
+    throw new Error("Method not implemented.");
   }
 
   // Group performance operations
@@ -371,9 +396,95 @@ export class DatabaseStorage implements IStorage {
   async createInvestment(investment: InsertInvestment): Promise<Investment> {
     const [newInvestment] = await db
       .insert(investments)
-      .values(investment)
+      .values({
+        ...investment,
+        active: false // New investments start as inactive until voted on
+      })
       .returning();
     return newInvestment;
+  }
+
+  async voteOnInvestment(vote: InsertInvestmentVote) {
+    // First, check if user has already voted
+    const existingVote = await db
+      .select()
+      .from(investmentVotes)
+      .where(and(
+        eq(investmentVotes.investmentId, vote.investmentId),
+        eq(investmentVotes.userId, vote.userId)
+      ))
+      .limit(1);
+
+    if (existingVote.length > 0) {
+      // Update existing vote
+      const [updatedVote] = await db
+        .update(investmentVotes)
+        .set({ vote: vote.vote })
+        .where(and(
+          eq(investmentVotes.investmentId, vote.investmentId),
+          eq(investmentVotes.userId, vote.userId)
+        ))
+        .returning();
+
+      await this.checkInvestmentActivation(vote.investmentId);
+      return updatedVote;
+    } else {
+      // Create new vote
+      const [newVote] = await db.insert(investmentVotes).values(vote).returning();
+      await this.checkInvestmentActivation(vote.investmentId);
+      return newVote;
+    }
+  }
+
+  async checkInvestmentActivation(investmentId: number) {
+    // Get total number of users
+    const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
+    const totalUserCount = totalUsers[0].count;
+
+    // Get votes for this investment
+    const votes = await db
+      .select()
+      .from(investmentVotes)
+      .where(eq(investmentVotes.investmentId, investmentId));
+
+    const yesVotes = votes.filter(v => v.vote === true).length;
+    const requiredVotes = Math.ceil(totalUserCount * 0.8); // 80% threshold
+
+    // Activate investment if it has enough yes votes
+    if (yesVotes >= requiredVotes) {
+      await db
+        .update(investments)
+        .set({ active: true })
+        .where(eq(investments.id, investmentId));
+    }
+  }
+
+  async getInvestmentVotes(investmentId: number) {
+    return await db
+      .select({
+        id: investmentVotes.id,
+        userId: investmentVotes.userId,
+        vote: investmentVotes.vote,
+        createdAt: investmentVotes.createdAt,
+        firstName: users.firstName,
+        lastName: users.lastName
+      })
+      .from(investmentVotes)
+      .leftJoin(users, eq(investmentVotes.userId, users.id))
+      .where(eq(investmentVotes.investmentId, investmentId));
+  }
+
+  async getUserVoteForInvestment(investmentId: number, userId: number) {
+    const vote = await db
+      .select()
+      .from(investmentVotes)
+      .where(and(
+        eq(investmentVotes.investmentId, investmentId),
+        eq(investmentVotes.userId, userId)
+      ))
+      .limit(1);
+
+    return vote.length > 0 ? vote[0] : null;
   }
 
   async getActiveInvestments(): Promise<Investment[]> {

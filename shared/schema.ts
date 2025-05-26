@@ -45,6 +45,15 @@ export const investments = pgTable("investments", {
   active: boolean("active").default(true),
 });
 
+// Investment votes model
+export const investmentVotes = pgTable("investment_votes", {
+  id: serial("id").primaryKey(),
+  investmentId: integer("investment_id").notNull().references(() => investments.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  vote: boolean("vote").notNull(), // true for yes, false for no
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Group performance model for group metrics
 export const groupPerformance = pgTable("group_performance", {
   id: serial("id").primaryKey(),
@@ -89,6 +98,11 @@ export const insertInvestmentSchema = createInsertSchema(investments).omit({
   ]).optional(),
 });
 
+export const insertInvestmentVoteSchema = createInsertSchema(investmentVotes).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertGroupPerformanceSchema = createInsertSchema(groupPerformance).omit({
   id: true,
   date: true,
@@ -111,6 +125,8 @@ export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type Investment = typeof investments.$inferSelect;
 export type InsertInvestment = z.infer<typeof insertInvestmentSchema>;
+export type InvestmentVote = typeof investmentVotes.$inferSelect;
+export type InsertInvestmentVote = z.infer<typeof insertInvestmentVoteSchema>;
 export type GroupPerformance = typeof groupPerformance.$inferSelect;
 export type InsertGroupPerformance = z.infer<typeof insertGroupPerformanceSchema>;
 export type MonthlyPerformance = typeof monthlyPerformance.$inferSelect;

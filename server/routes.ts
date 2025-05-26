@@ -6,6 +6,7 @@ import {
   insertUserSchema, 
   insertTransactionSchema,
   insertInvestmentSchema,
+  insertInvestmentVoteSchema,
   User
 } from "@shared/schema";
 import { ZodError } from "zod";
@@ -250,6 +251,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+
+  app.post(
+    "/api/investments/:id/vote",
+    isAuthenticated,
+    validateRequest(insertInvestmentVoteSchema),
+    async (req, res) => {
+      try {
+        const investmentId = parseInt(req.params.id);
+        const user = req.user as User;
+        const vote = await storage.voteOnInvestment({
+          ...req.body,
+          investmentId,
+          userId: user.id
+        });
+        res.status(201).json(vote);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to record vote" });
+      }
+    }
+  );
+
+  app.get("/api/investments/:id/votes", isAuthenticated, async (req, res) => {
+    try {
+      const investmentId = parseInt(req.params.id);
+      const votes = await storage.getInvestmentVotes(investmentId);
+      res.json(votes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch votes" });
+    }
+  });
+
+  app.get("/api/investments/:id/my-vote", isAuthenticated, async (req, res) => {
+    try {
+      const investmentId = parseInt(req.params.id);
+      const user = req.user as User;
+      const vote = await storage.getUserVoteForInvestment(investmentId, user.id);
+      res.json(vote);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user vote" });
+    }
+  });
 
   app.get("/api/group-performance", isAuthenticated, async (req, res) => {
     try {
