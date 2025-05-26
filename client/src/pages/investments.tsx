@@ -78,8 +78,8 @@ export default function Investments() {
         description: values.description || "",
         totalAmount: parseFloat(values.totalAmount),
         returnRate: parseFloat(values.returnRate),
-        startDate: new Date(values.startDate).toISOString(),
-        endDate: values.endDate ? new Date(values.endDate).toISOString() : null,
+        startDate: new Date(values.startDate),
+        endDate: values.endDate ? new Date(values.endDate) : null,
         active: true,
       });
     },
