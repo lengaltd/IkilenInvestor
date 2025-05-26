@@ -5,6 +5,7 @@ import {
   loginSchema, 
   insertUserSchema, 
   insertTransactionSchema,
+  insertInvestmentSchema,
   User
 } from "@shared/schema";
 import { ZodError } from "zod";
@@ -229,12 +230,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/investments", isAuthenticated, async (req, res) => {
     try {
-      const investments = await storage.getActiveInvestments();
+      const investments = await storage.getAllInvestments();
       res.json(investments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch investments" });
     }
   });
+
+  app.post(
+    "/api/investments",
+    isAuthenticated,
+    validateRequest(insertInvestmentSchema),
+    async (req, res) => {
+      try {
+        const investment = await storage.createInvestment(req.body);
+        res.status(201).json(investment);
+      } catch (error) {
+        res.status(500).json({ message: "Failed to create investment" });
+      }
+    }
+  );
 
   app.get("/api/group-performance", isAuthenticated, async (req, res) => {
     try {

@@ -14,24 +14,25 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserLastLogin(id: number): Promise<User | undefined>;
-  
+
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   getTransactionsByUserId(userId: number): Promise<Transaction[]>;
-  
+
   // Balance operations
   getUserBalance(userId: number): Promise<number>;
   getUserTotalContributions(userId: number): Promise<number>;
   getUserTotalEarnings(userId: number): Promise<number>;
-  
+
   // Investment operations
   createInvestment(investment: InsertInvestment): Promise<Investment>;
   getActiveInvestments(): Promise<Investment[]>;
-  
+  getAllInvestments(): Promise<Investment[]>;
+
   // Group performance operations
   getLatestGroupPerformance(): Promise<GroupPerformance | undefined>;
   updateGroupPerformance(performance: InsertGroupPerformance): Promise<GroupPerformance>;
-  
+
   // Monthly performance operations
   getMonthlyPerformance(limit: number): Promise<MonthlyPerformance[]>;
   addMonthlyPerformance(performance: InsertMonthlyPerformance): Promise<MonthlyPerformance>;
@@ -43,7 +44,7 @@ export class MemStorage implements IStorage {
   private investments: Map<number, Investment>;
   private groupPerformanceData: Map<number, GroupPerformance>;
   private monthlyPerformanceData: Map<number, MonthlyPerformance>;
-  
+
   private userIdCounter: number;
   private transactionIdCounter: number;
   private investmentIdCounter: number;
@@ -56,13 +57,13 @@ export class MemStorage implements IStorage {
     this.investments = new Map();
     this.groupPerformanceData = new Map();
     this.monthlyPerformanceData = new Map();
-    
+
     this.userIdCounter = 1;
     this.transactionIdCounter = 1;
     this.investmentIdCounter = 1;
     this.groupPerformanceIdCounter = 1;
     this.monthlyPerformanceIdCounter = 1;
-    
+
     // Initialize with demo data
     this.initializeDemoData();
   }
@@ -90,7 +91,7 @@ export class MemStorage implements IStorage {
     this.users.set(id, user);
     return user;
   }
-  
+
   async updateUserLastLogin(id: number): Promise<User | undefined> {
     const user = await this.getUser(id);
     if (user) {
@@ -159,15 +160,18 @@ export class MemStorage implements IStorage {
   }
 
   async getActiveInvestments(): Promise<Investment[]> {
-    return Array.from(this.investments.values())
-      .filter(investment => investment.active);
+    return Array.from(this.investments.values()).filter(investment => investment.active);
+  }
+
+  async getAllInvestments(): Promise<Investment[]> {
+    return Array.from(this.investments.values());
   }
 
   // Group performance operations
   async getLatestGroupPerformance(): Promise<GroupPerformance | undefined> {
     const performances = Array.from(this.groupPerformanceData.values());
     if (performances.length === 0) return undefined;
-    
+
     return performances.sort((a, b) => b.date.getTime() - a.date.getTime())[0];
   }
 
@@ -221,7 +225,7 @@ export class MemStorage implements IStorage {
     const transactionTypes: Array<"contribution" | "dividend" | "withdrawal" | "fee"> = [
       "contribution", "dividend", "contribution"
     ];
-    
+
     const amounts = [500, 125.50, 500];
     const dates = [
       new Date("2023-06-01"),
@@ -243,7 +247,7 @@ export class MemStorage implements IStorage {
         note: notes[i],
         paymentMethod: paymentMethods[i]
       };
-      
+
       // Manually set the date for demo
       const createdTransaction = this.createTransaction(transaction);
       const tx = this.transactions.get(createdTransaction.id);
@@ -265,7 +269,7 @@ export class MemStorage implements IStorage {
     // Create monthly performance data
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
     const returns = [4.2, 3.8, 5.1, 6.2, 7.0, 8.4];
-    
+
     for (let i = 0; i < months.length; i++) {
       this.addMonthlyPerformance({
         month: months[i],
@@ -305,7 +309,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return user;
   }
-  
+
   async updateUserLastLogin(id: number): Promise<User | undefined> {
     const [user] = await db
       .update(users)
@@ -314,7 +318,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return user;
   }
-  
+
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
     const [newTransaction] = await db
       .insert(transactions)
@@ -322,7 +326,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return newTransaction;
   }
-  
+
   async getTransactionsByUserId(userId: number): Promise<Transaction[]> {
     return db
       .select()
@@ -330,16 +334,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(transactions.userId, userId))
       .orderBy(desc(transactions.date));
   }
-  
+
   async getUserBalance(userId: number): Promise<number> {
     const result = await db
       .select({ total: sql<number>`SUM(CASE WHEN type IN ('contribution', 'dividend') THEN amount ELSE -amount END)` })
       .from(transactions)
       .where(eq(transactions.userId, userId));
-    
+
     return result[0]?.total || 0;
   }
-  
+
   async getUserTotalContributions(userId: number): Promise<number> {
     const result = await db
       .select({ total: sql<number>`SUM(amount)` })
@@ -348,10 +352,10 @@ export class DatabaseStorage implements IStorage {
         eq(transactions.userId, userId),
         eq(transactions.type, 'contribution')
       ));
-    
+
     return result[0]?.total || 0;
   }
-  
+
   async getUserTotalEarnings(userId: number): Promise<number> {
     const result = await db
       .select({ total: sql<number>`SUM(amount)` })
@@ -360,10 +364,10 @@ export class DatabaseStorage implements IStorage {
         eq(transactions.userId, userId),
         eq(transactions.type, 'dividend')
       ));
-    
+
     return result[0]?.total || 0;
   }
-  
+
   async createInvestment(investment: InsertInvestment): Promise<Investment> {
     const [newInvestment] = await db
       .insert(investments)
@@ -371,24 +375,30 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return newInvestment;
   }
-  
+
   async getActiveInvestments(): Promise<Investment[]> {
     return db
       .select()
       .from(investments)
       .where(eq(investments.active, true));
   }
-  
+
+  async getAllInvestments(): Promise<Investment[]> {
+     return db
+      .select()
+      .from(investments);
+  }
+
   async getLatestGroupPerformance(): Promise<GroupPerformance | undefined> {
     const [performance] = await db
       .select()
       .from(groupPerformance)
       .orderBy(desc(groupPerformance.date))
       .limit(1);
-    
+
     return performance;
   }
-  
+
   async updateGroupPerformance(performance: InsertGroupPerformance): Promise<GroupPerformance> {
     const [newPerformance] = await db
       .insert(groupPerformance)
@@ -396,7 +406,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return newPerformance;
   }
-  
+
   async getMonthlyPerformance(limit: number): Promise<MonthlyPerformance[]> {
     return db
       .select()
@@ -404,7 +414,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(sql`${monthlyPerformance.year}, ${monthlyPerformance.month}`))
       .limit(limit);
   }
-  
+
   async addMonthlyPerformance(performance: InsertMonthlyPerformance): Promise<MonthlyPerformance> {
     const [newPerformance] = await db
       .insert(monthlyPerformance)
