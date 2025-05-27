@@ -231,10 +231,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/investments", isAuthenticated, async (req, res) => {
     try {
-      const investments = await storage.getAllInvestments();
+      const investments = await storage.getActiveInvestments();
       res.json(investments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch investments" });
+    }
+  });
+
+  // Get all members with contribution summaries
+  app.get("/api/members", isAuthenticated, async (req, res) => {
+    try {
+      const members = await storage.getAllMembers();
+      
+      const memberSummaries = await Promise.all(
+        members.map(async (member) => {
+          const contributions = await storage.getTransactionsByUserId(member.id);
+          const contributionTransactions = contributions.filter(t => t.type === 'contribution');
+          const totalContributions = contributionTransactions.reduce((sum, t) => sum + t.amount, 0);
+          const lastContribution = contributionTransactions.length > 0 ? contributionTransactions[0].date : null;
+          
+          return {
+            id: member.id,
+            firstName: member.firstName,
+            lastName: member.lastName,
+            email: member.email,
+            totalContributions,
+            lastContribution,
+            contributionCount: contributionTransactions.length,
+            joinDate: member.createdAt || new Date().toISOString(),
+          };
+        })
+      );
+      
+      res.json(memberSummaries);
+    } catch (error) {
+      console.error("Members error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Get member contribution history
+  app.get("/api/members/:id/history", isAuthenticated, async (req, res) => {
+    try {
+      const memberId = parseInt(req.params.id);
+      const year = req.query.year ? parseInt(req.query.year as string) : undefined;
+      
+      const history = await storage.getMemberContributionHistory(memberId, year);
+      
+      res.json(history);
+    } catch (error) {
+      console.error("Member history error:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 

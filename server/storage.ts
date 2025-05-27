@@ -543,7 +543,19 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getMemberContributionHistory(userId: number, year?: number): Promise<Transaction[]> {
-    let query = db
+    if (year) {
+      return db
+        .select()
+        .from(transactions)
+        .where(and(
+          eq(transactions.userId, userId),
+          eq(transactions.type, 'contribution'),
+          sql`EXTRACT(YEAR FROM ${transactions.date}) = ${year}`
+        ))
+        .orderBy(desc(transactions.date));
+    }
+    
+    return db
       .select()
       .from(transactions)
       .where(and(
@@ -551,16 +563,6 @@ export class DatabaseStorage implements IStorage {
         eq(transactions.type, 'contribution')
       ))
       .orderBy(desc(transactions.date));
-    
-    if (year) {
-      query = query.where(and(
-        eq(transactions.userId, userId),
-        eq(transactions.type, 'contribution'),
-        sql`EXTRACT(YEAR FROM ${transactions.date}) = ${year}`
-      ));
-    }
-    
-    return query;
   }
 }
 
