@@ -14,6 +14,7 @@ import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Investments from "@/pages/investments";
 import History from "@/pages/history";
+import Members from "@/pages/members";
 import Settings from "@/pages/settings";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -69,6 +70,14 @@ function Router() {
         {() => (
           <PrivateRoute>
             <History />
+          </PrivateRoute>
+        )}
+      </Route>
+      
+      <Route path="/members">
+        {() => (
+          <PrivateRoute>
+            <Members />
           </PrivateRoute>
         )}
       </Route>

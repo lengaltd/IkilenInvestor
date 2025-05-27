@@ -48,6 +48,10 @@ export interface IStorage {
   // Monthly performance operations
   getMonthlyPerformance(limit: number): Promise<MonthlyPerformance[]>;
   addMonthlyPerformance(performance: InsertMonthlyPerformance): Promise<MonthlyPerformance>;
+  
+  // Member operations
+  getAllMembers(): Promise<User[]>;
+  getMemberContributionHistory(userId: number, year?: number): Promise<Transaction[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -532,6 +536,31 @@ export class DatabaseStorage implements IStorage {
       .values(performance)
       .returning();
     return newPerformance;
+  }
+  
+  async getAllMembers(): Promise<User[]> {
+    return db.select().from(users).orderBy(users.firstName, users.lastName);
+  }
+  
+  async getMemberContributionHistory(userId: number, year?: number): Promise<Transaction[]> {
+    let query = db
+      .select()
+      .from(transactions)
+      .where(and(
+        eq(transactions.userId, userId),
+        eq(transactions.type, 'contribution')
+      ))
+      .orderBy(desc(transactions.date));
+    
+    if (year) {
+      query = query.where(and(
+        eq(transactions.userId, userId),
+        eq(transactions.type, 'contribution'),
+        sql`EXTRACT(YEAR FROM ${transactions.date}) = ${year}`
+      ));
+    }
+    
+    return query;
   }
 }
 
